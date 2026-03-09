@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "Fiserv Payment Operations Dashboard",
+    "title": "ACME Payment Operations Dashboard",
     "subtitle": "Monitor transactions, settlements, and system health in real time",
     "environment": {
       "production": "Production",
@@ -138,9 +138,10 @@
     }
   },
   "footer": {
-    "copyright": "© {{year}} Fiserv, Inc. All rights reserved.",
+    "copyright": "© {{year}} ACME, Inc. All rights reserved.",
     "terms": "Terms of Service",
     "privacy": "Privacy Policy",
-    "support": "Contact Support"
+    "support": "Contact Support",
+    "supportMessage": "Need assistance? Our support team is here to help you with any questions or issues you may have."
   }
 }
