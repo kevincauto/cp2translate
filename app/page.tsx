@@ -7,7 +7,7 @@ import { LanguageSelectCard } from "@/components/LanguageSelectCard";
 import { MatchMatrix } from "@/components/MatchMatrix";
 import { UploadCard } from "@/components/UploadCard";
 import { postSse } from "@/lib/client/sse";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import section1Default from "@/app/section1.default.json";
@@ -63,7 +63,7 @@ export default function Home() {
   });
   const [matchMatrix, setMatchMatrix] = useState<MatchMatrixType | null>(null);
   const [diffItems, setDiffItems] = useState<DiffItem[]>([]);
-  const [consultantProviderId, setConsultantProviderId] = useState<ProviderId>("anthropic");
+  const [consultantProviderId, setConsultantProviderId] = useState<ProviderId>("openai");
   const [opinionChains, setOpinionChains] = useState<Record<string, Recommendation[]>>({});
   const [activeOpinionIndexByKey, setActiveOpinionIndexByKey] = useState<Record<string, number>>({});
   const [secondOpinionProviderByKey, setSecondOpinionProviderByKey] = useState<
@@ -438,8 +438,7 @@ export default function Home() {
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-4 p-6">
       <header>
-        <h1 className="text-2xl font-semibold">LLM i18next Translation Web App</h1>
-        <p className="text-sm text-gray-600">State: {state}</p>
+        <h1 className="text-2xl font-semibold">AI Agent Translation Consultant</h1>
       </header>
 
       <UploadCard
@@ -454,6 +453,7 @@ export default function Home() {
         <Card>
           <CardHeader>
             <CardTitle>Security Warnings</CardTitle>
+            <CardDescription>If there are any keys that resemble sensitive data, they'll be listed below.</CardDescription>
           </CardHeader>
           <CardContent className="text-sm">
             {parseWarnings.map((warning) => (
@@ -481,7 +481,9 @@ export default function Home() {
         state === "reviewed") ? (
         <Card>
           <CardHeader>
-            <CardTitle>3) Translation Run</CardTitle>
+            <CardTitle>3) Translate</CardTitle>
+            <CardDescription>This will run 3 translators in parallel to translate the file. Each model is given high level context about
+              the application so that translations are not only accurate but also contextually appropriate.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             <Button type="button" onClick={handleTranslate} disabled={state === "translating"}>

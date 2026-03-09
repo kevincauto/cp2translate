@@ -23,8 +23,8 @@ export function UploadCard({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>1) Upload or Paste i18next JSON</CardTitle>
-        <CardDescription>Provide nested English JSON with string-only leaves.</CardDescription>
+        <CardTitle>1) Upload or Paste JSON Translation File</CardTitle>
+        <CardDescription>Provide the English-based file with unique translation keys or just process the sample JSON in the text area below</CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="flex gap-2">
@@ -54,7 +54,7 @@ export function UploadCard({
         />
         {parseError ? <p className="text-sm text-red-700">{parseError}</p> : null}
         <Button type="button" onClick={onParse} disabled={isParsing || !jsonText.trim()}>
-          {isParsing ? "Parsing..." : "Parse JSON"}
+          {isParsing ? "Parsing..." : "Process JSON File"}
         </Button>
       </CardContent>
     </Card>

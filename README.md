@@ -1,4 +1,4 @@
-# LLM i18next Translation Web App
+# AI Agent Translation Consultant
 
 Hack Week app for translating nested i18next JSON via 3 independent LLM agents, comparing outputs, consulting reviewers on differences, and exporting final merged JSON.
 

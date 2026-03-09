@@ -18,7 +18,7 @@ export function LanguageSelectCard({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>2) Select Target Locale</CardTitle>
+        <CardTitle>2) Select Target Language</CardTitle>
         <CardDescription>Choose the language you want to translate into.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
