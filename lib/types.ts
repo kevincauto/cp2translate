@@ -36,3 +36,8 @@ export type Recommendation = {
 export type TranslationMap = Record<string, string>;
 
 export type MatchMatrix = Record<TranslationId, Record<TranslationId, number>>;
+
+export type MatchCounts = Record<
+  TranslationId,
+  Record<TranslationId, { same: number; total: number }>
+>;

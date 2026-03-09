@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { buildDiffItems, buildMatchMatrix } from "@/lib/compare/compare";
+import {
+  buildDiffItems,
+  buildMatchCounts,
+  buildMatchMatrix,
+} from "@/lib/compare/compare";
 
 describe("compare utilities", () => {
   it("builds pairwise match matrix", () => {
@@ -12,6 +16,18 @@ describe("compare utilities", () => {
     expect(matrix.A.A).toBe(100);
     expect(matrix.A.B).toBe(50);
     expect(matrix.A.C).toBe(100);
+  });
+
+  it("builds pairwise match counts", () => {
+    const counts = buildMatchCounts({
+      A: { k1: "A", k2: "B" },
+      B: { k1: "A", k2: "C" },
+      C: { k1: "A", k2: "B" },
+    });
+
+    expect(counts.A.A).toEqual({ same: 2, total: 2 });
+    expect(counts.A.B).toEqual({ same: 1, total: 2 });
+    expect(counts.A.C).toEqual({ same: 2, total: 2 });
   });
 
   it("extracts diff items where candidates differ", () => {

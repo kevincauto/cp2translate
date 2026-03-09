@@ -1,10 +1,20 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TRANSLATION_ORDER } from "@/lib/translations";
-import type { MatchMatrix as MatchMatrixType, TranslationId } from "@/lib/types";
+import type {
+  MatchCounts,
+  MatchMatrix as MatchMatrixType,
+  TranslationId,
+} from "@/lib/types";
 
 const TRANSLATIONS: TranslationId[] = TRANSLATION_ORDER;
 
-export function MatchMatrix({ matrix }: { matrix: MatchMatrixType | null }) {
+export function MatchMatrix({
+  matrix,
+  counts,
+}: {
+  matrix: MatchMatrixType | null;
+  counts?: MatchCounts | null;
+}) {
   if (!matrix) {
     return null;
   }
@@ -37,7 +47,12 @@ export function MatchMatrix({ matrix }: { matrix: MatchMatrixType | null }) {
                         --
                       </span>
                     ) : (
-                      matrix[row][col].toFixed(2)
+                      <span>
+                        {matrix[row][col].toFixed(2)}% match
+                        {counts?.[row]?.[col]
+                          ? ` (${counts[row][col].same}/${counts[row][col].total})`
+                          : null}
+                      </span>
                     )}
                   </td>
                 ))}

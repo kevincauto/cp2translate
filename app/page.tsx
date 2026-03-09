@@ -7,13 +7,20 @@ import { LanguageSelectCard } from "@/components/LanguageSelectCard";
 import { MatchMatrix } from "@/components/MatchMatrix";
 import { UploadCard } from "@/components/UploadCard";
 import { postSse } from "@/lib/client/sse";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import section1Default from "@/app/section1.default.json";
 import type {
   DiffItem,
   FlatEntry,
+  MatchCounts,
   MatchMatrix as MatchMatrixType,
   ProviderId,
   Recommendation,
@@ -46,38 +53,56 @@ type ParseResponse = {
 
 export default function Home() {
   const [state, setState] = useState<AppState>("idle");
-  const [jsonText, setJsonText] = useState(() => JSON.stringify(section1Default, null, 2));
+  const [jsonText, setJsonText] = useState(() =>
+    JSON.stringify(section1Default, null, 2),
+  );
   const [parseError, setParseError] = useState<string | null>(null);
-  const [parseWarnings, setParseWarnings] = useState<Array<{ keyPath: string; message: string }>>([]);
+  const [parseWarnings, setParseWarnings] = useState<
+    Array<{ keyPath: string; message: string }>
+  >([]);
   const [flatEntries, setFlatEntries] = useState<FlatEntry[]>([]);
   const [selectedLocale, setSelectedLocale] = useState("es");
-  const [translations, setTranslations] = useState<Record<TranslationId, TranslationMap>>({
+  const [translations, setTranslations] = useState<
+    Record<TranslationId, TranslationMap>
+  >({
     A: {},
     B: {},
     C: {},
   });
-  const [progressByTranslation, setProgressByTranslation] = useState<TranslationProgress>({
-    A: { keysDone: 0, percent: 0, status: "idle" },
-    B: { keysDone: 0, percent: 0, status: "idle" },
-    C: { keysDone: 0, percent: 0, status: "idle" },
-  });
+  const [progressByTranslation, setProgressByTranslation] =
+    useState<TranslationProgress>({
+      A: { keysDone: 0, percent: 0, status: "idle" },
+      B: { keysDone: 0, percent: 0, status: "idle" },
+      C: { keysDone: 0, percent: 0, status: "idle" },
+    });
   const [matchMatrix, setMatchMatrix] = useState<MatchMatrixType | null>(null);
+  const [matchCounts, setMatchCounts] = useState<MatchCounts | null>(null);
   const [diffItems, setDiffItems] = useState<DiffItem[]>([]);
-  const [consultantProviderId, setConsultantProviderId] = useState<ProviderId>("openai");
-  const [opinionChains, setOpinionChains] = useState<Record<string, Recommendation[]>>({});
-  const [activeOpinionIndexByKey, setActiveOpinionIndexByKey] = useState<Record<string, number>>({});
+  const [consultantProviderId, setConsultantProviderId] =
+    useState<ProviderId>("openai");
+  const [opinionChains, setOpinionChains] = useState<
+    Record<string, Recommendation[]>
+  >({});
+  const [activeOpinionIndexByKey, setActiveOpinionIndexByKey] = useState<
+    Record<string, number>
+  >({});
   const [secondOpinionProviderByKey, setSecondOpinionProviderByKey] = useState<
     Record<string, ProviderId>
   >({});
-  const [secondOpinionLoadingByKey, setSecondOpinionLoadingByKey] = useState<Record<string, boolean>>({});
-  const [finalSelections, setFinalSelections] = useState<Record<string, TranslationId>>({});
+  const [secondOpinionLoadingByKey, setSecondOpinionLoadingByKey] = useState<
+    Record<string, boolean>
+  >({});
+  const [finalSelections, setFinalSelections] = useState<
+    Record<string, TranslationId>
+  >({});
   const [globalError, setGlobalError] = useState<string | null>(null);
   const translateAbortRef = useRef<AbortController | null>(null);
   const consultAbortRef = useRef<AbortController | null>(null);
 
   const locale = selectedLocale;
   const englishMap = useMemo(
-    () => Object.fromEntries(flatEntries.map((item) => [item.keyPath, item.value])),
+    () =>
+      Object.fromEntries(flatEntries.map((item) => [item.keyPath, item.value])),
     [flatEntries],
   );
 
@@ -98,7 +123,10 @@ export default function Home() {
     return merged;
   }, [diffItems, finalSelections, flatEntries.length, translations.A]);
 
-  const diffItemByKey = useMemo(() => new Map(diffItems.map((item) => [item.keyPath, item])), [diffItems]);
+  const diffItemByKey = useMemo(
+    () => new Map(diffItems.map((item) => [item.keyPath, item])),
+    [diffItems],
+  );
 
   async function handleParse() {
     setParseError(null);
@@ -141,7 +169,10 @@ export default function Home() {
         },
         (event, data) => {
           if (event === "translationStarted") {
-            const payload = data as { translationId: TranslationId; totalChunks: number };
+            const payload = data as {
+              translationId: TranslationId;
+              totalChunks: number;
+            };
             setProgressByTranslation((prev) => ({
               ...prev,
               [payload.translationId]: {
@@ -158,12 +189,17 @@ export default function Home() {
               chunkIndex: number;
               totalChunks: number;
             };
-            const chunkFloor = Math.round(((payload.chunkIndex + 0.2) / payload.totalChunks) * 100);
+            const chunkFloor = Math.round(
+              ((payload.chunkIndex + 0.2) / payload.totalChunks) * 100,
+            );
             setProgressByTranslation((prev) => ({
               ...prev,
               [payload.translationId]: {
                 ...prev[payload.translationId],
-                percent: Math.min(99, Math.max(prev[payload.translationId].percent, chunkFloor)),
+                percent: Math.min(
+                  99,
+                  Math.max(prev[payload.translationId].percent, chunkFloor),
+                ),
                 status: "running",
               },
             }));
@@ -181,14 +217,20 @@ export default function Home() {
               ...prev,
               [payload.translationId]: {
                 keysDone: payload.keysDone,
-                percent: Math.min(99, Math.round((payload.keysDone / payload.keysTotal) * 100)),
+                percent: Math.min(
+                  99,
+                  Math.round((payload.keysDone / payload.keysTotal) * 100),
+                ),
                 status: "running",
               },
             }));
           }
 
           if (event === "translationCompleted") {
-            const payload = data as { translationId: TranslationId; keysDone: number };
+            const payload = data as {
+              translationId: TranslationId;
+              keysDone: number;
+            };
             setProgressByTranslation((prev) => ({
               ...prev,
               [payload.translationId]: {
@@ -225,7 +267,9 @@ export default function Home() {
         setState("languageSelected");
         return;
       }
-      setGlobalError(error instanceof Error ? error.message : "Translation failed.");
+      setGlobalError(
+        error instanceof Error ? error.message : "Translation failed.",
+      );
       setState("languageSelected");
     }
   }
@@ -246,6 +290,7 @@ export default function Home() {
       return;
     }
     setMatchMatrix(payload.matchMatrix);
+    setMatchCounts(payload.matchCounts ?? null);
     setDiffItems(payload.diffItems);
     setOpinionChains({});
     setActiveOpinionIndexByKey({});
@@ -272,7 +317,10 @@ export default function Home() {
         },
         (event, data) => {
           if (event === "consultantCompleted") {
-            const payload = data as { consultantProviderId: ProviderId; recommendations: Recommendation[] };
+            const payload = data as {
+              consultantProviderId: ProviderId;
+              recommendations: Recommendation[];
+            };
             const chainMap: Record<string, Recommendation[]> = {};
             const activeMap: Record<string, number> = {};
             const secondOpinionProviderMap: Record<string, ProviderId> = {};
@@ -307,7 +355,9 @@ export default function Home() {
         setState("compared");
         return;
       }
-      setGlobalError(error instanceof Error ? error.message : "Consulting failed.");
+      setGlobalError(
+        error instanceof Error ? error.message : "Consulting failed.",
+      );
       setState("compared");
     }
   }
@@ -345,7 +395,8 @@ export default function Home() {
 
   async function handleSecondOpinion(keyPath: string) {
     const diffItem = diffItemByKey.get(keyPath);
-    const selectedProvider = secondOpinionProviderByKey[keyPath] ?? consultantProviderId;
+    const selectedProvider =
+      secondOpinionProviderByKey[keyPath] ?? consultantProviderId;
     if (!diffItem) {
       return;
     }
@@ -399,16 +450,24 @@ export default function Home() {
         },
       );
     } catch (error) {
-      setGlobalError(error instanceof Error ? error.message : "Second opinion failed.");
+      setGlobalError(
+        error instanceof Error ? error.message : "Second opinion failed.",
+      );
     } finally {
       setSecondOpinionLoadingByKey((prev) => ({ ...prev, [keyPath]: false }));
     }
   }
 
   function buildOptionSet(rec: Recommendation) {
-    const sourceSet = new Set<TranslationId>([rec.chosen, ...rec.alternatives.map((alt) => alt.source)]);
+    const sourceSet = new Set<TranslationId>([
+      rec.chosen,
+      ...rec.alternatives.map((alt) => alt.source),
+    ]);
     const allSources = Array.from(sourceSet) as TranslationId[];
-    const ordered = [rec.chosen, ...allSources.filter((source) => source !== rec.chosen)].slice(0, 3);
+    const ordered = [
+      rec.chosen,
+      ...allSources.filter((source) => source !== rec.chosen),
+    ].slice(0, 3);
 
     return ordered.map((source, index) => {
       const label = index === 0 ? "A" : index === 1 ? "B" : "C";
@@ -428,8 +487,10 @@ export default function Home() {
         label,
         source,
         translation: alternative?.translation ?? "",
-        meaningInEnglish: alternative?.meaningInEnglish ?? "No English meaning provided.",
-        explanation: alternative?.explanation ?? "No additional explanation provided.",
+        meaningInEnglish:
+          alternative?.meaningInEnglish ?? "No English meaning provided.",
+        explanation:
+          alternative?.explanation ?? "No additional explanation provided.",
         isRecommended: false,
       };
     });
@@ -438,7 +499,9 @@ export default function Home() {
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-4 p-6">
       <header>
-        <h1 className="text-2xl font-semibold">AI Agent Translation Consultant</h1>
+        <h1 className="text-2xl font-semibold">
+          AI Agent Translation Consultant
+        </h1>
       </header>
 
       <UploadCard
@@ -453,7 +516,10 @@ export default function Home() {
         <Card>
           <CardHeader>
             <CardTitle>Security Warnings</CardTitle>
-            <CardDescription>If there are any keys that resemble sensitive data, they'll be listed below.</CardDescription>
+            <CardDescription>
+              If there are any keys that resemble sensitive data, they'll be
+              listed below.
+            </CardDescription>
           </CardHeader>
           <CardContent className="text-sm">
             {parseWarnings.map((warning) => (
@@ -473,33 +539,51 @@ export default function Home() {
         />
       ) : null}
 
-      {(state === "languageSelected" ||
-        state === "translating" ||
-        state === "translated" ||
-        state === "compared" ||
-        state === "consulting" ||
-        state === "reviewed") ? (
+      {state === "languageSelected" ||
+      state === "translating" ||
+      state === "translated" ||
+      state === "compared" ||
+      state === "consulting" ||
+      state === "reviewed" ? (
         <Card>
           <CardHeader>
             <CardTitle>3) Translate</CardTitle>
-            <CardDescription>This will run 3 translators in parallel to translate the file. Each model is given high level context about
-              the application so that translations are not only accurate but also contextually appropriate.</CardDescription>
+            <CardDescription>
+              This will run 3 translators in parallel to translate the file.
+              Each model is given high level context about the application so
+              that translations are not only accurate but also contextually
+              appropriate.
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Button type="button" onClick={handleTranslate} disabled={state === "translating"}>
+            <Button
+              type="button"
+              onClick={handleTranslate}
+              disabled={state === "translating"}
+            >
               {state === "translating" ? "Translating..." : "Run 3 Translators"}
             </Button>
             {state === "translating" ? (
-              <Button type="button" variant="outline" onClick={() => translateAbortRef.current?.abort()}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => translateAbortRef.current?.abort()}
+              >
                 Cancel Translation
               </Button>
             ) : null}
-            <AgentColumns progressByTranslation={progressByTranslation} totalKeys={flatEntries.length} />
+            <AgentColumns
+              progressByTranslation={progressByTranslation}
+              totalKeys={flatEntries.length}
+            />
           </CardContent>
         </Card>
       ) : null}
 
-      {(state === "translated" || state === "compared" || state === "consulting" || state === "reviewed") ? (
+      {state === "translated" ||
+      state === "compared" ||
+      state === "consulting" ||
+      state === "reviewed" ? (
         <Card>
           <CardHeader>
             <CardTitle>Compare Outputs</CardTitle>
@@ -512,9 +596,11 @@ export default function Home() {
         </Card>
       ) : null}
 
-      {(state === "compared" || state === "consulting" || state === "reviewed") ? (
+      {state === "compared" ||
+      state === "consulting" ||
+      state === "reviewed" ? (
         <>
-          <MatchMatrix matrix={matchMatrix} />
+          <MatchMatrix matrix={matchMatrix} counts={matchCounts} />
           <DiffViewer diffItems={diffItems} />
           <Card>
             <CardHeader>
@@ -523,13 +609,18 @@ export default function Home() {
             <CardContent className="space-y-3">
               <div className="grid gap-2 md:grid-cols-[1fr_auto] md:items-end">
                 <div className="space-y-1">
-                  <label className="text-sm font-medium" htmlFor="consultant-model">
+                  <label
+                    className="text-sm font-medium"
+                    htmlFor="consultant-model"
+                  >
                     Consultant model
                   </label>
                   <Select
                     id="consultant-model"
                     value={consultantProviderId}
-                    onChange={(event) => setConsultantProviderId(event.target.value as ProviderId)}
+                    onChange={(event) =>
+                      setConsultantProviderId(event.target.value as ProviderId)
+                    }
                     disabled={state === "consulting"}
                   >
                     <option value="openai">OpenAI</option>
@@ -537,13 +628,23 @@ export default function Home() {
                     <option value="anthropic">Anthropic Claude</option>
                   </Select>
                 </div>
-                <Button type="button" onClick={handleConsult} disabled={state === "consulting"}>
-                  {state === "consulting" ? "Running Consultant..." : "Run Consultant Agent"}
+                <Button
+                  type="button"
+                  onClick={handleConsult}
+                  disabled={state === "consulting"}
+                >
+                  {state === "consulting"
+                    ? "Running Consultant..."
+                    : "Run Consultant Agent"}
                 </Button>
               </div>
 
               {state === "consulting" ? (
-                <Button type="button" variant="outline" onClick={() => consultAbortRef.current?.abort()}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => consultAbortRef.current?.abort()}
+                >
                   Cancel Consulting
                 </Button>
               ) : null}
@@ -552,13 +653,17 @@ export default function Home() {
                 <div className="space-y-4">
                   {diffItems.map((diffItem) => {
                     const chain = opinionChains[diffItem.keyPath] ?? [];
-                    const activeIndex = activeOpinionIndexByKey[diffItem.keyPath] ?? 0;
+                    const activeIndex =
+                      activeOpinionIndexByKey[diffItem.keyPath] ?? 0;
                     if (chain.length === 0) {
                       return null;
                     }
 
                     return (
-                      <div key={diffItem.keyPath} className="rounded border p-3 text-sm">
+                      <div
+                        key={diffItem.keyPath}
+                        className="rounded border p-3 text-sm"
+                      >
                         {chain.map((rec, chainIndex) => {
                           const options = buildOptionSet(rec);
                           const disabled = chainIndex !== activeIndex;
@@ -571,25 +676,37 @@ export default function Home() {
                               }`}
                             >
                               <p className="font-mono text-xs text-gray-700">
-                                id: {rec.keyPath} {isActive ? "(active opinion)" : "(disabled opinion)"}
+                                id: {rec.keyPath}{" "}
+                                {isActive
+                                  ? "(active opinion)"
+                                  : "(disabled opinion)"}
                               </p>
                               <p className="mt-1">
                                 <strong>English:</strong> {rec.english}
                               </p>
                               <p>
-                                <strong>Recommended:</strong> {rec.english} {"->"} {rec.translation}
+                                <strong>Recommended:</strong> {rec.english}{" "}
+                                {"->"} {rec.translation}
                               </p>
-                              <p className="mt-1 text-xs text-gray-700">{rec.explanation}</p>
+                              <p className="mt-1 text-xs text-gray-700">
+                                {rec.explanation}
+                              </p>
 
                               <div className="mt-3 space-y-2">
                                 {options.map((option) => (
-                                  <div key={`${rec.keyPath}-${chainIndex}-${option.label}`} className="rounded bg-gray-50 p-2">
+                                  <div
+                                    key={`${rec.keyPath}-${chainIndex}-${option.label}`}
+                                    className="rounded bg-gray-50 p-2"
+                                  >
                                     <label className="flex items-start gap-2">
                                       <input
                                         type="radio"
                                         name={`${rec.keyPath}-${chainIndex}`}
                                         disabled={disabled}
-                                        checked={finalSelections[rec.keyPath] === option.source && isActive}
+                                        checked={
+                                          finalSelections[rec.keyPath] ===
+                                            option.source && isActive
+                                        }
                                         onChange={() =>
                                           setFinalSelections((prev) => ({
                                             ...prev,
@@ -600,18 +717,23 @@ export default function Home() {
                                       <span>
                                         <strong>
                                           Choice {option.label}
-                                          {option.isRecommended ? " (recommended)" : ""}
+                                          {option.isRecommended
+                                            ? " (recommended)"
+                                            : ""}
                                         </strong>{" "}
                                         [Translation {option.source}]
                                         <br />
-                                        {rec.english} {"->"} {option.translation}
+                                        {rec.english} {"->"}{" "}
+                                        {option.translation}
                                       </span>
                                     </label>
                                     {!option.isRecommended ? (
                                       <p className="mt-1 text-xs text-gray-700">
-                                        Meaning in English: {option.meaningInEnglish}
+                                        Meaning in English:{" "}
+                                        {option.meaningInEnglish}
                                         <br />
-                                        Why not this choice? {option.explanation}
+                                        Why not this choice?{" "}
+                                        {option.explanation}
                                       </p>
                                     ) : null}
                                   </div>
@@ -620,7 +742,9 @@ export default function Home() {
 
                               {isActive ? (
                                 <div className="mt-3 rounded border border-dashed p-2">
-                                  <p className="text-xs font-medium">Choice D: Get a second opinion</p>
+                                  <p className="text-xs font-medium">
+                                    Choice D: Get a second opinion
+                                  </p>
                                   <div className="mt-2 grid gap-2 md:grid-cols-[1fr_auto] md:items-end">
                                     <div className="space-y-1">
                                       <label
@@ -632,26 +756,43 @@ export default function Home() {
                                       <Select
                                         id={`second-opinion-model-${rec.keyPath}`}
                                         value={
-                                          secondOpinionProviderByKey[rec.keyPath] ?? consultantProviderId
+                                          secondOpinionProviderByKey[
+                                            rec.keyPath
+                                          ] ?? consultantProviderId
                                         }
                                         onChange={(event) =>
-                                          setSecondOpinionProviderByKey((prev) => ({
-                                            ...prev,
-                                            [rec.keyPath]: event.target.value as ProviderId,
-                                          }))
+                                          setSecondOpinionProviderByKey(
+                                            (prev) => ({
+                                              ...prev,
+                                              [rec.keyPath]: event.target
+                                                .value as ProviderId,
+                                            }),
+                                          )
                                         }
-                                        disabled={Boolean(secondOpinionLoadingByKey[rec.keyPath])}
+                                        disabled={Boolean(
+                                          secondOpinionLoadingByKey[
+                                            rec.keyPath
+                                          ],
+                                        )}
                                       >
                                         <option value="openai">OpenAI</option>
-                                        <option value="gemini">Google Gemini</option>
-                                        <option value="anthropic">Anthropic Claude</option>
+                                        <option value="gemini">
+                                          Google Gemini
+                                        </option>
+                                        <option value="anthropic">
+                                          Anthropic Claude
+                                        </option>
                                       </Select>
                                     </div>
                                     <Button
                                       type="button"
                                       variant="outline"
-                                      disabled={Boolean(secondOpinionLoadingByKey[rec.keyPath])}
-                                      onClick={() => handleSecondOpinion(rec.keyPath)}
+                                      disabled={Boolean(
+                                        secondOpinionLoadingByKey[rec.keyPath],
+                                      )}
+                                      onClick={() =>
+                                        handleSecondOpinion(rec.keyPath)
+                                      }
                                     >
                                       {secondOpinionLoadingByKey[rec.keyPath]
                                         ? "Getting second opinion..."
@@ -663,7 +804,9 @@ export default function Home() {
                             </div>
                           );
                         })}
-                        <div className="text-xs text-gray-600">Opinion count: {chain.length}</div>
+                        <div className="text-xs text-gray-600">
+                          Opinion count: {chain.length}
+                        </div>
                       </div>
                     );
                   })}
@@ -671,7 +814,12 @@ export default function Home() {
               ) : null}
 
               <div className="pt-2">
-                <Button onClick={handleDownload} disabled={!finalPreview || Object.keys(opinionChains).length === 0}>
+                <Button
+                  onClick={handleDownload}
+                  disabled={
+                    !finalPreview || Object.keys(opinionChains).length === 0
+                  }
+                >
                   Download Final JSON
                 </Button>
               </div>
@@ -690,4 +838,3 @@ export default function Home() {
     </main>
   );
 }
-

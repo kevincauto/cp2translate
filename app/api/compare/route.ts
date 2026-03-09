@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { buildDiffItems, buildMatchMatrix } from "@/lib/compare/compare";
+import {
+  buildDiffItems,
+  buildMatchCounts,
+  buildMatchMatrix,
+} from "@/lib/compare/compare";
 import { TRANSLATION_ORDER } from "@/lib/translations";
 import type { TranslationId, TranslationMap } from "@/lib/types";
 
@@ -40,11 +44,13 @@ export async function POST(request: Request) {
     const body = bodySchema.parse(await request.json());
     const translations = fillMissingKeys(body.english, body.translations);
     const matchMatrix = buildMatchMatrix(translations);
+    const matchCounts = buildMatchCounts(translations);
     const diffItems = buildDiffItems({ english: body.english, translations });
 
     return NextResponse.json({
       ok: true,
       matchMatrix,
+      matchCounts,
       diffItems,
       diffCount: diffItems.length,
     });
