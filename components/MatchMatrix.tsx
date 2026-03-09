@@ -19,47 +19,39 @@ export function MatchMatrix({
     return null;
   }
 
+  const pairs: Array<{ left: TranslationId; right: TranslationId }> = [];
+  for (let i = 0; i < TRANSLATIONS.length; i++) {
+    for (let j = i + 1; j < TRANSLATIONS.length; j++) {
+      pairs.push({ left: TRANSLATIONS[i], right: TRANSLATIONS[j] });
+    }
+  }
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>4) Match Matrix (%)</CardTitle>
+        <CardTitle>4) Comparing the Translations A, B, and C</CardTitle>
       </CardHeader>
       <CardContent>
-        <table className="w-full border-collapse text-sm">
-          <thead>
-            <tr>
-              <th className="border p-2 text-left">Translation</th>
-              {TRANSLATIONS.map((translationId) => (
-                <th key={translationId} className="border p-2 text-left">
-                  Translation {translationId}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {TRANSLATIONS.map((row) => (
-              <tr key={row}>
-                <td className="border p-2 font-medium">Translation {row}</td>
-                {TRANSLATIONS.map((col) => (
-                  <td key={`${row}-${col}`} className="border p-2">
-                    {row === col ? (
-                      <span className="text-gray-500" aria-hidden="true">
-                        --
-                      </span>
-                    ) : (
-                      <span>
-                        {matrix[row][col].toFixed(2)}% match
-                        {counts?.[row]?.[col]
-                          ? ` (${counts[row][col].same}/${counts[row][col].total})`
-                          : null}
-                      </span>
-                    )}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="space-y-4 text-sm">
+          {pairs.map(({ left, right }) => {
+            const percent = matrix[left][right];
+            const pairCounts = counts?.[left]?.[right] ?? null;
+
+            return (
+              <div key={`${left}-${right}`} className="space-y-1">
+                <div className="font-semibold">
+                  [{left} vs {right}]: {percent.toFixed(2)}% match
+                </div>
+                {pairCounts ? (
+                  <div className="text-muted-foreground">
+                    ({pairCounts.same}/{pairCounts.total} translated phrases
+                    were an exact match)
+                  </div>
+                ) : null}
+              </div>
+            );
+          })}
+        </div>
       </CardContent>
     </Card>
   );
