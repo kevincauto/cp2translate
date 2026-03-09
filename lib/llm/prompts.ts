@@ -4,10 +4,13 @@ export function buildTranslatorPrompt(params: {
   locale: string;
   chunk: FlatEntry[];
 }) {
-  const payload = Object.fromEntries(params.chunk.map((item) => [item.keyPath, item.value]));
+  const payload = Object.fromEntries(
+    params.chunk.map((item) => [item.keyPath, item.value]),
+  );
 
   return [
     `You are a professional i18n translator.`,
+    `Context: these translations are for production-level software in credit card processing and reporting.`,
     `Target locale: ${params.locale}.`,
     `Translate all values and return only a JSON object with exactly the same keys.`,
     `Strict rules:`,
@@ -27,6 +30,7 @@ export function buildConsultantPrompt(params: {
 }) {
   return [
     `You are a translation consultant reviewing competing translations.`,
+    `Context: these translations are for production-level software in credit card processing and reporting.`,
     `Target locale: ${params.locale}.`,
     `For each item, choose the best option among Translation A, Translation B, and Translation C.`,
     `IMPORTANT: All explanations MUST be in English even though translations are in ${params.locale}.`,
