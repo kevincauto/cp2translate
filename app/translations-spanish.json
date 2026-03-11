@@ -1,0 +1,147 @@
+{
+"app": {
+"title": "Panel de Operaciones de Pagos de ACME",
+"subtitle": "Monitoree transacciones, liquidaciones y el estado del sistema en tiempo real",
+"environment": {
+"production": "Producción",
+"staging": "Pruebas",
+"sandbox": "Sandbox"
+}
+},
+"navigation": {
+"home": "Inicio",
+"transactions": "Transacciones",
+"settlements": "Liquidaciones",
+"reports": "Informes",
+"users": "Gestión de usuarios",
+"settings": "Configuración",
+"logout": "Cerrar sesión"
+},
+"dashboard": {
+"welcome": "Bienvenido(a) de nuevo, {{name}}.",
+"lastLogin": "Su último inicio de sesión fue el {{date}} a las {{time}}.",
+"systemStatus": {
+"title": "Estado del sistema",
+"healthy": "Todos los sistemas están funcionando con normalidad.",
+"degraded": "El rendimiento está degradado. Algunos servicios pueden presentar demoras.",
+"outage": "Actualmente estamos experimentando una interrupción del servicio."
+},
+"metrics": {
+"totalVolume": "Volumen total de transacciones",
+"totalVolumeValue": "{{amount}} procesados hoy",
+"pendingTransactions": "Transacciones pendientes",
+"pendingTransactions_one": "{{count}} transacción pendiente",
+"pendingTransactions_other": "{{count}} transacciones pendientes"
+}
+},
+"transactions": {
+"searchPlaceholder": "Buscar por ID de transacción, número de cuenta o referencia",
+"filters": {
+"status": "Estado",
+"dateRange": "Rango de fechas",
+"amountRange": "Rango de monto",
+"apply": "Aplicar filtros",
+"clear": "Borrar filtros"
+},
+"table": {
+"id": "ID de transacción",
+"account":  "Cuenta",
+"amount":  "Monto",
+"status": "Estado",
+"date": "Fecha",
+"actions": "Acciones",
+"noResults": "No se encontraron transacciones que coincidan con sus criterios.",
+},
+"details": {
+"title": "Detalles de la transacción",
+"reference": "Número de referencia",
+"origin": "Cuenta de origen",
+"destination": "Cuenta de destino",
+"processingFee":  "Tarifa de procesamiento",
+"notes": "Notas internas",
+"notesHelper": "Estas notas solo son visibles para usuarios internos autorizados."
+}
+},
+"settlements": {
+"title":  "Resumen de liquidaciones",
+"summary": "El lote de liquidación {{batchId}} se procesó correctamente.",
+"summaryFailed": "El lote de liquidación {{batchId}} falló con {{count}} errores.",
+"export": "Exportar informe de liquidación",
+"downloadCsv": "Descargar CSV",
+"downloadPdf": "Descargar PDF"
+},
+"users": {
+"title": "Gestión de usuarios",
+"inviteUser": "Invitar nuevo usuario",
+"roles": {
+"admin": "Administrador",
+"analyst": "Analista de operaciones",
+"viewer": "Visualizador de solo lectura",
+},
+"status": {
+"active": "Activo",
+"inactive": "Inactivo",
+"pending": "Invitación pendiente"
+},
+"inviteModal": {
+"title": "Invitar a un nuevo usuario",
+"description": "Ingrese la dirección de correo electrónico del usuario y asigne un rol.",
+"emailLabel": "Dirección de correo electrónico",
+"roleLabel": "Rol",
+"sendInvite": "Enviar invitación",
+"successMessage": "Se ha enviado una invitación a {{email}}."
+}
+},
+"settings": {
+"profile": {
+"title": "Configuración del perfil",
+"updateSuccess": "Su perfil se ha actualizado correctamente.",
+"languagePreference": "Preferencia de idioma",
+"timezone": "Zona horaria"
+},
+"security": {
+"title": "Configuración de seguridad",
+"changePassword": "Cambiar contraseña",
+"mfa": "Autenticación multifactor",
+"mfaEnabled": "La autenticación multifactor está habilitada.",
+"mfaDisabled": "La autenticación multifactor no está habilitada."
+},
+"notifications": {
+"title": "Preferencias de notificación",
+"emailNotifications": "Notificaciones por correo electrónico",
+"smsNotifications": "Notificaciones por SMS",
+"weeklyReport": "Envíeme un informe de resumen semanal."
+}
+},
+"errors": {
+"generic": "Ocurrió un error inesperado. Por favor, inténtelo de nuevo más tarde.",
+"network": "Se perdió la conexión de red. Por favor, verifique su conexión a internet.",
+"unauthorized": "No está autorizado para realizar esta acción.",
+"forbidden": "Acceso denegado.",
+"notFound": "No se pudo encontrar el recurso solicitado.",
+"validation": {
+"required": "Este campo es obligatorio.",
+"invalidEmail": "Por favor, ingrese una dirección de correo electrónico válida.",
+"minLength": "Este campo debe contener al menos {{count}} caracteres."
+}
+},
+"alerts": {
+"confirmDelete": {
+"title": "Confirmar eliminación",
+"message": "¿Está seguro de que desea eliminar este registro? Esta acción no se puede deshacer.",
+"confirmButton": "Sí, eliminar",
+"cancelButton":  "Cancelar"
+},
+"sessionExpiring": {
+"title": "La sesión está por expirar",
+"message": "Su sesión expirará en {{minutes}} minutos.\nPor favor, guarde su trabajo para evitar perder cambios."
+}
+},
+"footer": {
+"copyright": "© {{year}} ACME, Inc. Todos los derechos reservados.",
+"terms": "Términos de servicio",
+"privacy": "Política de privacidad",
+"support": "Contactar con soporte",
+"supportMessage": "¿Necesita ayuda? Nuestro equipo de soporte está aquí para ayudarle con cualquier pregunta o problema que pueda tener."
+}
+}

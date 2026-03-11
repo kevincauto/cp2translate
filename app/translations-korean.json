@@ -1,0 +1,145 @@
+{
+  "app": {
+    "title": "ACME 결제 운영 대시보드",
+    "subtitle": "거래, 정산 및 시스템 상태를 실시간으로 모니터링하세요",
+    "environment": {
+      "production": "운영",
+      "staging": "스테이징",
+      "sandbox": "샌드박스"
+    }
+  },
+  "navigation": {
+    "home": "홈",
+    "transactions": "거래",
+    "settlements": "정산",
+    "reports": "보고서",
+    "users": "사용자 관리",
+    "settings": "설정",
+    "logout": "로그아웃"
+  },
+  "dashboard": {
+    "welcome": "{{name}}님, 다시 오신 것을 환영합니다.",
+    "lastLogin": "마지막 로그인: {{date}} {{time}}",
+    "systemStatus": {
+      "title": "시스템 상태",
+      "healthy": "모든 시스템이 정상적으로 운영되고 있습니다.",
+      "degraded": "성능이 저하되었습니다. 일부 서비스가 지연될 수 있습니다.",
+      "outage": "현재 서비스 장애가 발생하고 있습니다."
+    },
+    "metrics": {
+      "totalVolume": "총 거래 금액",
+      "totalVolumeValue": "오늘 {{amount}} 처리됨",
+      "pendingTransactions": "대기 중인 거래",
+      "pendingTransactions_one": "대기 중인 거래 {{count}}건",
+      "pendingTransactions_other": "대기 중인 거래 {{count}}건"
+    }
+  },
+  "transactions": {
+    "searchPlaceholder": "거래 ID, 계좌번호 또는 참조번호로 검색",
+    "filters": {
+      "status": "상태",
+      "dateRange": "날짜 범위",
+      "amountRange": "금액 범위",
+      "apply": "필터 적용",
+      "clear": "필터 초기화"
+    },
+    "table": {
+      "id": "거래 ID",
+      "account": "계좌",
+      "amount": "금액",
+      "status": "상태",
+      "date": "날짜",
+      "actions": "작업",
+      "noResults": "조건에 맞는 거래를 찾을 수 없습니다."
+    },
+    "details": {
+      "title": "거래 상세정보",
+      "reference": "참조번호",
+      "origin": "출금 계좌",
+      "destination": "입금 계좌",
+      "processingFee": "처리 수수료",
+      "notes": "내부 메모",
+      "notesHelper": "이 메모는 권한이 있는 내부 사용자에게만 표시됩니다."
+    }
+  },
+  "settlements": {
+    "title": "정산 개요",
+    "summary": "정산 배치 {{batchId}}가 성공적으로 처리되었습니다.",
+    "summaryFailed": "정산 배치 {{batchId}} 처리 중 오류 {{count}}건이 발생했습니다.",
+    "export": "정산 보고서 내보내기",
+    "downloadCsv": "CSV 다운로드",
+    "downloadPdf": "PDF 다운로드"
+  },
+  "users": {
+    "title": "사용자 관리",
+    "inviteUser": "새 사용자 초대",
+    "roles": {
+      "admin": "관리자",
+      "analyst": "운영 분석가",
+      "viewer": "읽기 전용 뷰어"
+    },
+    "status": {
+      "active": "활성",
+      "inactive": "비활성",
+      "pending": "초대 대기 중"
+    },
+    "inviteModal": {
+      "title": "새 사용자 초대",
+      "description": "사용자의 이메일 주소를 입력하고 역할을 지정하세요.",
+      "emailLabel": "이메일 주소",
+      "roleLabel": "역할",
+      "sendInvite": "초대 보내기",
+      "successMessage": "{{email}}로 초대가 전송되었습니다."    }
+  },
+  "settings": {
+    "profile": {
+      "title": "프로필 설정",
+      "updateSuccess": "프로필이 성공적으로 업데이트되었습니다.",      
+      "languagePreference": "언어 설정",
+      "timezone": "시간대"
+    },
+    "security": {
+      "title": "보안 설정",
+      "changePassword": "비밀번호 변경",
+      "mfa": "다단계 인증",
+      "mfaEnabled": "다단계 인증이 활성화되어 있습니다.",
+      "mfaDisabled": "다단계 인증이 활성화되어 있지 않습니다."    },
+    "notifications": {
+      "title": "알림 설정",
+      "emailNotifications": "이메일 알림",
+      "smsNotifications": "SMS 알림",
+      "weeklyReport": "주간 요약 보고서를 보내주세요."
+    }
+  },
+  "errors": {
+    "generic": "예기치 않은 오류가 발생했습니다. 나중에 다시 시도해 주세요.",    "network": "네트워크 연결이 끊어졌습니다. 인터넷 연결을 확인해 주세요.",
+    "unauthorized": "이 작업을 수행할 권한이 없습니다.",
+    "forbidden": "접근이 거부되었습니다.",
+    "notFound": "요청한 리소스를 찾을 수 없습니다.",
+    "validation": {
+      "required": "이 필드는 필수입니다.",
+      "invalidEmail": "유효한 이메일 주소를 입력해 주세요.",
+      "minLength": "이 필드는 최소 {{count}}자 이상이어야 합니다."
+    }
+  },
+  "alerts": {
+    "confirmDelete": {
+      "title": "삭제 확인",
+      "message": "이 기록을 정말 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+      "confirmButton": "예, 삭제합니다",
+      "cancelButton": "취소"
+    },
+    "sessionExpiring": {
+      "title": "세션이 곧 만료됩니다",
+      "message": "{{minutes}}분 후 세션이 만료됩니다.\n변경 사항이 손실되지 않도록 작업을 저장해 주세요."
+    }
+  },
+  "footer": {
+    "copyright": "© {{year}} ACME, Inc. 판권 소유",
+    "terms": "서비스 이용약관",
+    "privacy": "개인정보 처리방침",
+    "support": "지원팀에 문의",
+    "supportMessage": "도움이 필요하신가요? 지원팀이 문의사항이나 문제 해결을 도와드리겠습니다."
+  }
+}
+
