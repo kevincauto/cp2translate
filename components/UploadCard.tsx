@@ -11,19 +11,22 @@ export function UploadCard({
   onParse,
   isParsing,
   parseError,
+  warnings
 }: {
   jsonText: string;
   onJsonTextChange: (value: string) => void;
   onParse: () => void;
   isParsing: boolean;
   parseError?: string | null;
+  warnings: Array<{ keyPath: string; message: string }>
 }) {
+
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>1) Upload or Paste JSON Translation File</CardTitle>
+        <CardTitle>Upload or paste JSON translation file</CardTitle>
         <CardDescription>Provide the English-based file with unique translation keys or just process the sample JSON in the text area below</CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -53,9 +56,26 @@ export function UploadCard({
           className="min-h-44 font-mono"
         />
         {parseError ? <p className="text-sm text-red-700">{parseError}</p> : null}
-        <Button type="button" onClick={onParse} disabled={isParsing || !jsonText.trim()}>
+        <Button type="button" onClick={onParse} disabled={(isParsing || !jsonText.trim())}>
           {isParsing ? "Parsing..." : "Process JSON File"}
         </Button>
+
+        { !!warnings.length &&
+          <>
+            <hr></hr>
+            <div>
+              <h4 className="text-orange-700">Security Warnings</h4>
+              <p className="text-xs">If there are any keys that resemble sensitive data, they'll be listed below.</p>
+              <ol className="text-sm list-decimal list-inside mt-4">
+                {warnings.map((warning) => (
+                  <li className="mb-2" key={`${warning.keyPath}-${warning.message}`}>
+                    <span className="font-semibold text-orange-700">{warning.keyPath}</span>: {warning.message}
+                  </li>
+                ))}
+              </ol>
+          </div>
+          </>
+      }
       </CardContent>
     </Card>
   );
