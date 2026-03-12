@@ -30,15 +30,26 @@ import type {
 } from "@/lib/types";
 import { COMMON_LOCALES } from "@/lib/client/locales";
 
-export const personas = [ 
-    { type: 'non-translator', label: "I'm a non-translation professional" },
-    { type: 'translator', label: "I'm a professional translator or native speaking individual" },
-  ] as const;
+export const personas = [
+  { type: "non-translator", label: "I'm a non-translation professional" },
+  {
+    type: "translator",
+    label: "I'm a professional translator or native speaking individual",
+  },
+] as const;
 
 export type AppState = {
-  state: "idle" | "parsed" | "languageSelected" | "translating" | "translated" | "compared" | "consulting" | "reviewed",
-  persona: typeof personas[number]['type'],
-  selectedLocale: typeof COMMON_LOCALES[number]['code']
+  state:
+    | "idle"
+    | "parsed"
+    | "languageSelected"
+    | "translating"
+    | "translated"
+    | "compared"
+    | "consulting"
+    | "reviewed";
+  persona: (typeof personas)[number]["type"];
+  selectedLocale: (typeof COMMON_LOCALES)[number]["code"];
 };
 
 type TranslationProgress = Record<
@@ -55,12 +66,18 @@ type ParseResponse = {
 };
 
 export const AppContext = createContext<{
-  appState: AppState
+  appState: AppState;
 } | null>(null);
 
 export default function Home() {
-  const [appState, setAppState] = useState<AppState>({ state: "idle", persona: personas[0].type, selectedLocale: '' });
-  const [jsonText, setJsonText] = useState(() => JSON.stringify(section1Default, null, 2));
+  const [appState, setAppState] = useState<AppState>({
+    state: "idle",
+    persona: personas[0].type,
+    selectedLocale: "",
+  });
+  const [jsonText, setJsonText] = useState(() =>
+    JSON.stringify(section1Default, null, 2),
+  );
   const [parseError, setParseError] = useState<string | null>(null);
   const [parseWarnings, setParseWarnings] = useState<
     Array<{ keyPath: string; message: string }>
@@ -132,11 +149,11 @@ export default function Home() {
     [diffItems],
   );
 
-  function handlePersonaSelect(persona: AppState['persona']) {
+  function handlePersonaSelect(persona: AppState["persona"]) {
     setAppState({
       ...appState,
       // state: "persona-chosen",
-      persona
+      persona,
     });
   }
 
@@ -159,7 +176,7 @@ export default function Home() {
     setParseWarnings(payload.warnings ?? []);
     setAppState({
       ...appState,
-      state: 'parsed'
+      state: "parsed",
     });
   }
 
@@ -167,7 +184,7 @@ export default function Home() {
     setGlobalError(null);
     setAppState({
       ...appState,
-      state: 'translating'
+      state: "translating",
     });
     setProgressByTranslation({
       A: { keysDone: 0, percent: 0, status: "starting" },
@@ -275,7 +292,7 @@ export default function Home() {
             });
             setAppState({
               ...appState,
-              state: 'translated'
+              state: "translated",
             });
           }
         },
@@ -287,14 +304,16 @@ export default function Home() {
         setGlobalError("Translation cancelled.");
         setAppState({
           ...appState,
-          state: 'idle'
+          state: "idle",
         });
         return;
       }
-      setGlobalError(error instanceof Error ? error.message : "Translation failed.");
+      setGlobalError(
+        error instanceof Error ? error.message : "Translation failed.",
+      );
       setAppState({
         ...appState,
-        state: 'idle'
+        state: "idle",
       });
     }
   }
@@ -324,19 +343,19 @@ export default function Home() {
     setFinalSelections({});
     setAppState({
       ...appState,
-      state: 'compared'
+      state: "compared",
     });
   }
 
   const handleDiffSelections = () => {
     // to-do: implement manual diff selections for translator persona
-  }
+  };
 
   async function handleConsult() {
     setGlobalError(null);
     setAppState({
       ...appState,
-      state: 'consulting'
+      state: "consulting",
     });
 
     consultAbortRef.current?.abort();
@@ -380,7 +399,7 @@ export default function Home() {
           if (event === "done") {
             setAppState({
               ...appState,
-              state: 'reviewed'
+              state: "reviewed",
             });
           }
         },
@@ -392,14 +411,16 @@ export default function Home() {
         setGlobalError("Consulting cancelled.");
         setAppState({
           ...appState,
-          state: 'compared'
+          state: "compared",
         });
         return;
       }
-      setGlobalError(error instanceof Error ? error.message : "Consulting failed.");
+      setGlobalError(
+        error instanceof Error ? error.message : "Consulting failed.",
+      );
       setAppState({
         ...appState,
-        state: 'compared'
+        state: "compared",
       });
     }
   }
@@ -484,7 +505,7 @@ export default function Home() {
             }));
             setAppState({
               ...appState,
-              state: 'reviewed'
+              state: "reviewed",
             });
           }
 
@@ -542,310 +563,362 @@ export default function Home() {
   }
 
   const appContext = {
-    appState
-  }
+    appState,
+  };
 
   return (
     <AppContext.Provider value={appContext}>
       <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-4 p-6">
-      <header>
-        <h1 className="text-2xl font-semibold">
-          AI Agent Translation Consultant
-        </h1>
-      </header>
+        <header>
+          <h1 className="text-2xl font-semibold">
+            The AI Translation Consultant
+          </h1>
+        </header>
 
-      <PersonaCard
-        onSelect={ handlePersonaSelect }
-        selectedPersona={ appState.persona }
-      ></PersonaCard>
+        <PersonaCard
+          onSelect={handlePersonaSelect}
+          selectedPersona={appState.persona}
+        ></PersonaCard>
 
-      <LanguageSelectCard
-        selectedLocale={appState.selectedLocale}
-        disabled={appState.state === 'translating'}
-        onSelectedLocaleChange={(localeCode) => setAppState({
-          ...appState,
-          state: 'languageSelected',
-          selectedLocale: localeCode
-        })}
-      />
-
-      { appState.selectedLocale &&
-        <UploadCard
-          jsonText={jsonText}
-          onJsonTextChange={setJsonText}
-          onParse={handleParse}
-          isParsing={false}
-          warnings={parseWarnings}
-          parseError={parseError}
+        <LanguageSelectCard
+          selectedLocale={appState.selectedLocale}
+          disabled={appState.state === "translating"}
+          onSelectedLocaleChange={(localeCode) =>
+            setAppState({
+              ...appState,
+              state: "languageSelected",
+              selectedLocale: localeCode,
+            })
+          }
         />
-      }
 
-      {["parsed", "translating", "translated"," compared", "consulting", "reviewed" ].includes(appState.state) ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>Translate</CardTitle>
-            <CardDescription>This will run 3 translators in parallel to translate the file. Each model is given high level context about
-              the application so that translations are not only accurate but also contextually appropriate.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="flex align-center gap-2">
-              <Button type="button" onClick={handleTranslate} disabled={!appState.selectedLocale || appState.state === "translating"}>
-                {appState.state === "translating" ? "Translating..." : "Run 3 Translators"}
-              </Button>
-              {appState.state === "translating" ? (
-                <Button type="button" variant="outline" onClick={() => translateAbortRef.current?.abort()}>
-                  Cancel Translation
+        {appState.selectedLocale && (
+          <UploadCard
+            jsonText={jsonText}
+            onJsonTextChange={setJsonText}
+            onParse={handleParse}
+            isParsing={false}
+            warnings={parseWarnings}
+            parseError={parseError}
+          />
+        )}
+
+        {[
+          "parsed",
+          "translating",
+          "translated",
+          " compared",
+          "consulting",
+          "reviewed",
+        ].includes(appState.state) ? (
+          <Card>
+            <CardHeader>
+              <CardTitle>Translate</CardTitle>
+              <CardDescription>
+                This will run 3 translators in parallel to translate the file.
+                Each model is given high level context about the application so
+                that translations are not only accurate but also contextually
+                appropriate.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex align-center gap-2">
+                <Button
+                  type="button"
+                  onClick={handleTranslate}
+                  disabled={
+                    !appState.selectedLocale || appState.state === "translating"
+                  }
+                >
+                  {appState.state === "translating"
+                    ? "Translating..."
+                    : "Run 3 Translators"}
                 </Button>
-              ) : null}
-            </div>
-            <AgentColumns
-              progressByTranslation={progressByTranslation}
-              totalKeys={flatEntries.length}
-            />
-          </CardContent>
-        </Card>
-      ) : null}
-
-      {(appState.state === "translated" || appState.state === "compared" || appState.state === "consulting" || appState.state === "reviewed") ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>Compare Outputs</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <Button type="button" onClick={handleCompare}>
-              Compute Match + Diffs
-            </Button>
-          </CardContent>
-        </Card>
-      ) : null}
-
-      { (appState.state === "compared" || appState.state === "consulting" || appState.state === "reviewed") ? (
-        <>
-          <MatchMatrix matrix={matchMatrix} counts={matchCounts} />
-          <DiffViewer diffItems={diffItems} onChange={ handleDiffSelections }/>
-          { appState.persona !== "translator" &&
-            <Card>
-              <CardHeader>
-                <CardTitle>Consultant Review + Final Selection</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="grid gap-2 md:grid-cols-[1fr_auto] md:items-end">
-                  <div className="space-y-1">
-                    <label
-                      className="text-sm font-medium"
-                      htmlFor="consultant-model"
-                    >
-                      Consultant model
-                    </label>
-                    <Select
-                      id="consultant-model"
-                      value={consultantProviderId}
-                      onChange={(event) => setConsultantProviderId(event.target.value as ProviderId)}
-                      disabled={appState.state === "consulting"}
-                    >
-                      <option value="openai">OpenAI</option>
-                      <option value="gemini">Google Gemini</option>
-                      <option value="anthropic">Anthropic Claude</option>
-                    </Select>
-                  </div>
-                  <Button type="button" onClick={handleConsult} disabled={appState.state === "consulting"}>
-                    {appState.state === "consulting" ? "Running Consultant..." : "Run Consultant Agent"}
-                  </Button>
-                </div>
-
-                {appState.state === "consulting" ? (
-                  <Button type="button" variant="outline" onClick={() => consultAbortRef.current?.abort()}>
-                    Cancel Consulting
+                {appState.state === "translating" ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => translateAbortRef.current?.abort()}
+                  >
+                    Cancel Translation
                   </Button>
                 ) : null}
+              </div>
+              <AgentColumns
+                progressByTranslation={progressByTranslation}
+                totalKeys={flatEntries.length}
+              />
+            </CardContent>
+          </Card>
+        ) : null}
 
-                {Object.keys(opinionChains).length > 0 ? (
-                  <div className="space-y-4">
-                    {diffItems.map((diffItem) => {
-                      const chain = opinionChains[diffItem.keyPath] ?? [];
-                      const activeIndex =
-                        activeOpinionIndexByKey[diffItem.keyPath] ?? 0;
-                      if (chain.length === 0) {
-                        return null;
-                      }
+        {appState.state === "translated" ||
+        appState.state === "compared" ||
+        appState.state === "consulting" ||
+        appState.state === "reviewed" ? (
+          <Card>
+            <CardHeader>
+              <CardTitle>Compare Outputs</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Button type="button" onClick={handleCompare}>
+                Compute Match + Diffs
+              </Button>
+            </CardContent>
+          </Card>
+        ) : null}
 
-                      return (
-                        <div
-                          key={diffItem.keyPath}
-                          className="rounded border p-3 text-sm"
-                        >
-                          {chain.map((rec, chainIndex) => {
-                            const options = buildOptionSet(rec);
-                            const disabled = chainIndex !== activeIndex;
-                            const isActive = !disabled;
-                            return (
-                              <div
-                                key={`${rec.keyPath}-opinion-${chainIndex}`}
-                                className={`mb-3 rounded border p-3 ${
-                                  disabled ? "bg-gray-50 opacity-65" : "bg-white"
-                                }`}
-                              >
-                                <p className="font-mono text-xs text-gray-700">
-                                  id: {rec.keyPath}{" "}
-                                  {isActive
-                                    ? "(active opinion)"
-                                    : "(disabled opinion)"}
-                                </p>
-                                <p className="mt-1">
-                                  <strong>English:</strong> {rec.english}
-                                </p>
-                                <p>
-                                  <strong>Recommended:</strong> {rec.english}{" "}
-                                  {"->"} {rec.translation}
-                                </p>
-                                <p className="mt-1 text-xs text-gray-700">
-                                  {rec.explanation}
-                                </p>
+        {appState.state === "compared" ||
+        appState.state === "consulting" ||
+        appState.state === "reviewed" ? (
+          <>
+            <MatchMatrix matrix={matchMatrix} counts={matchCounts} />
+            <DiffViewer diffItems={diffItems} onChange={handleDiffSelections} />
+            {appState.persona !== "translator" && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Consultant Review + Final Selection</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="grid gap-2 md:grid-cols-[1fr_auto] md:items-end">
+                    <div className="space-y-1">
+                      <label
+                        className="text-sm font-medium"
+                        htmlFor="consultant-model"
+                      >
+                        Consultant model
+                      </label>
+                      <Select
+                        id="consultant-model"
+                        value={consultantProviderId}
+                        onChange={(event) =>
+                          setConsultantProviderId(
+                            event.target.value as ProviderId,
+                          )
+                        }
+                        disabled={appState.state === "consulting"}
+                      >
+                        <option value="openai">OpenAI</option>
+                        <option value="gemini">Google Gemini</option>
+                        <option value="anthropic">Anthropic Claude</option>
+                      </Select>
+                    </div>
+                    <Button
+                      type="button"
+                      onClick={handleConsult}
+                      disabled={appState.state === "consulting"}
+                    >
+                      {appState.state === "consulting"
+                        ? "Running Consultant..."
+                        : "Run Consultant Agent"}
+                    </Button>
+                  </div>
 
-                                <div className="mt-3 space-y-2">
-                                  {options.map((option) => (
-                                    <div
-                                      key={`${rec.keyPath}-${chainIndex}-${option.label}`}
-                                      className="rounded bg-gray-50 p-2"
-                                    >
-                                      <label className="flex items-start gap-2">
-                                        <input
-                                          type="radio"
-                                          name={`${rec.keyPath}-${chainIndex}`}
-                                          disabled={disabled}
-                                          checked={
-                                            finalSelections[rec.keyPath] ===
-                                              option.source && isActive
-                                          }
-                                          onChange={() =>
-                                            setFinalSelections((prev) => ({
-                                              ...prev,
-                                              [rec.keyPath]: option.source,
-                                            }))
-                                          }
-                                        />
-                                        <span>
-                                          <strong>
-                                            Choice {option.label}
-                                            {option.isRecommended
-                                              ? " (recommended)"
-                                              : ""}
-                                          </strong>{" "}
-                                          [Translation {option.source}]
-                                          <br />
-                                          {rec.english} {"->"}{" "}
-                                          {option.translation}
-                                        </span>
-                                      </label>
-                                      {!option.isRecommended ? (
-                                        <p className="mt-1 text-xs text-gray-700">
-                                          Meaning in English:{" "}
-                                          {option.meaningInEnglish}
-                                          <br />
-                                          Why not this choice?{" "}
-                                          {option.explanation}
-                                        </p>
-                                      ) : null}
-                                    </div>
-                                  ))}
-                                </div>
+                  {appState.state === "consulting" ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => consultAbortRef.current?.abort()}
+                    >
+                      Cancel Consulting
+                    </Button>
+                  ) : null}
 
-                                {isActive ? (
-                                  <div className="mt-3 rounded border border-dashed p-2">
-                                    <p className="text-xs font-medium">
-                                      Choice D: Get a second opinion
-                                    </p>
-                                    <div className="mt-2 grid gap-2 md:grid-cols-[1fr_auto] md:items-end">
-                                      <div className="space-y-1">
-                                        <label
-                                          className="text-xs font-medium"
-                                          htmlFor={`second-opinion-model-${rec.keyPath}`}
-                                        >
-                                          Model
-                                        </label>
-                                        <Select
-                                          id={`second-opinion-model-${rec.keyPath}`}
-                                          value={
-                                            secondOpinionProviderByKey[
-                                              rec.keyPath
-                                            ] ?? consultantProviderId
-                                          }
-                                          onChange={(event) =>
-                                            setSecondOpinionProviderByKey(
-                                              (prev) => ({
+                  {Object.keys(opinionChains).length > 0 ? (
+                    <div className="space-y-4">
+                      {diffItems.map((diffItem) => {
+                        const chain = opinionChains[diffItem.keyPath] ?? [];
+                        const activeIndex =
+                          activeOpinionIndexByKey[diffItem.keyPath] ?? 0;
+                        if (chain.length === 0) {
+                          return null;
+                        }
+
+                        return (
+                          <div
+                            key={diffItem.keyPath}
+                            className="rounded border p-3 text-sm"
+                          >
+                            {chain.map((rec, chainIndex) => {
+                              const options = buildOptionSet(rec);
+                              const disabled = chainIndex !== activeIndex;
+                              const isActive = !disabled;
+                              return (
+                                <div
+                                  key={`${rec.keyPath}-opinion-${chainIndex}`}
+                                  className={`mb-3 rounded border p-3 ${
+                                    disabled
+                                      ? "bg-gray-50 opacity-65"
+                                      : "bg-white"
+                                  }`}
+                                >
+                                  <p className="font-mono text-xs text-gray-700">
+                                    id: {rec.keyPath}{" "}
+                                    {isActive
+                                      ? "(active opinion)"
+                                      : "(disabled opinion)"}
+                                  </p>
+                                  <p className="mt-1">
+                                    <strong>English:</strong> {rec.english}
+                                  </p>
+                                  <p>
+                                    <strong>Recommended:</strong> {rec.english}{" "}
+                                    {"->"} {rec.translation}
+                                  </p>
+                                  <p className="mt-1 text-xs text-gray-700">
+                                    {rec.explanation}
+                                  </p>
+
+                                  <div className="mt-3 space-y-2">
+                                    {options.map((option) => (
+                                      <div
+                                        key={`${rec.keyPath}-${chainIndex}-${option.label}`}
+                                        className="rounded bg-gray-50 p-2"
+                                      >
+                                        <label className="flex items-start gap-2">
+                                          <input
+                                            type="radio"
+                                            name={`${rec.keyPath}-${chainIndex}`}
+                                            disabled={disabled}
+                                            checked={
+                                              finalSelections[rec.keyPath] ===
+                                                option.source && isActive
+                                            }
+                                            onChange={() =>
+                                              setFinalSelections((prev) => ({
                                                 ...prev,
-                                                [rec.keyPath]: event.target
-                                                  .value as ProviderId,
-                                              }),
-                                            )
-                                          }
+                                                [rec.keyPath]: option.source,
+                                              }))
+                                            }
+                                          />
+                                          <span>
+                                            <strong>
+                                              Choice {option.label}
+                                              {option.isRecommended
+                                                ? " (recommended)"
+                                                : ""}
+                                            </strong>{" "}
+                                            [Translation {option.source}]
+                                            <br />
+                                            {rec.english} {"->"}{" "}
+                                            {option.translation}
+                                          </span>
+                                        </label>
+                                        {!option.isRecommended ? (
+                                          <p className="mt-1 text-xs text-gray-700">
+                                            Meaning in English:{" "}
+                                            {option.meaningInEnglish}
+                                            <br />
+                                            Why not this choice?{" "}
+                                            {option.explanation}
+                                          </p>
+                                        ) : null}
+                                      </div>
+                                    ))}
+                                  </div>
+
+                                  {isActive ? (
+                                    <div className="mt-3 rounded border border-dashed p-2">
+                                      <p className="text-xs font-medium">
+                                        Choice D: Get a second opinion
+                                      </p>
+                                      <div className="mt-2 grid gap-2 md:grid-cols-[1fr_auto] md:items-end">
+                                        <div className="space-y-1">
+                                          <label
+                                            className="text-xs font-medium"
+                                            htmlFor={`second-opinion-model-${rec.keyPath}`}
+                                          >
+                                            Model
+                                          </label>
+                                          <Select
+                                            id={`second-opinion-model-${rec.keyPath}`}
+                                            value={
+                                              secondOpinionProviderByKey[
+                                                rec.keyPath
+                                              ] ?? consultantProviderId
+                                            }
+                                            onChange={(event) =>
+                                              setSecondOpinionProviderByKey(
+                                                (prev) => ({
+                                                  ...prev,
+                                                  [rec.keyPath]: event.target
+                                                    .value as ProviderId,
+                                                }),
+                                              )
+                                            }
+                                            disabled={Boolean(
+                                              secondOpinionLoadingByKey[
+                                                rec.keyPath
+                                              ],
+                                            )}
+                                          >
+                                            <option value="openai">
+                                              OpenAI
+                                            </option>
+                                            <option value="gemini">
+                                              Google Gemini
+                                            </option>
+                                            <option value="anthropic">
+                                              Anthropic Claude
+                                            </option>
+                                          </Select>
+                                        </div>
+                                        <Button
+                                          type="button"
+                                          variant="outline"
                                           disabled={Boolean(
                                             secondOpinionLoadingByKey[
                                               rec.keyPath
                                             ],
                                           )}
+                                          onClick={() =>
+                                            handleSecondOpinion(rec.keyPath)
+                                          }
                                         >
-                                          <option value="openai">OpenAI</option>
-                                          <option value="gemini">
-                                            Google Gemini
-                                          </option>
-                                          <option value="anthropic">
-                                            Anthropic Claude
-                                          </option>
-                                        </Select>
+                                          {secondOpinionLoadingByKey[
+                                            rec.keyPath
+                                          ]
+                                            ? "Getting second opinion..."
+                                            : "Give me a second opinion"}
+                                        </Button>
                                       </div>
-                                      <Button
-                                        type="button"
-                                        variant="outline"
-                                        disabled={Boolean(
-                                          secondOpinionLoadingByKey[rec.keyPath],
-                                        )}
-                                        onClick={() =>
-                                          handleSecondOpinion(rec.keyPath)
-                                        }
-                                      >
-                                        {secondOpinionLoadingByKey[rec.keyPath]
-                                          ? "Getting second opinion..."
-                                          : "Give me a second opinion"}
-                                      </Button>
                                     </div>
-                                  </div>
-                                ) : null}
-                              </div>
-                            );
-                          })}
-                          <div className="text-xs text-gray-600">
-                            Opinion count: {chain.length}
+                                  ) : null}
+                                </div>
+                              );
+                            })}
+                            <div className="text-xs text-gray-600">
+                              Opinion count: {chain.length}
+                            </div>
                           </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
+                    </div>
+                  ) : null}
+
+                  <div className="pt-2">
+                    <Button
+                      onClick={handleDownload}
+                      disabled={
+                        !finalPreview || Object.keys(opinionChains).length === 0
+                      }
+                    >
+                      Download Final JSON
+                    </Button>
                   </div>
-                ) : null}
+                </CardContent>
+              </Card>
+            )}
+          </>
+        ) : null}
 
-                <div className="pt-2">
-                  <Button
-                    onClick={handleDownload}
-                    disabled={
-                      !finalPreview || Object.keys(opinionChains).length === 0
-                    }
-                  >
-                    Download Final JSON
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-           }
-        </>
-      ) : null}
-
-      {globalError ? (
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-sm text-red-700">{globalError}</p>
-          </CardContent>
-        </Card>
-      ) : null}
+        {globalError ? (
+          <Card>
+            <CardContent className="p-4">
+              <p className="text-sm text-red-700">{globalError}</p>
+            </CardContent>
+          </Card>
+        ) : null}
       </main>
     </AppContext.Provider>
   );
