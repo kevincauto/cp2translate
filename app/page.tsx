@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
-import section1Default from "@/app/section1.default.json";
+import shortenedEn from "@/app/shortened-en.json";
 import type {
   DiffItem,
   FlatEntry,
@@ -76,7 +76,7 @@ export default function Home() {
     selectedLocale: "",
   });
   const [jsonText, setJsonText] = useState(() =>
-    JSON.stringify(section1Default, null, 2),
+    JSON.stringify(shortenedEn, null, 2),
   );
   const [parseError, setParseError] = useState<string | null>(null);
   const [parseWarnings, setParseWarnings] = useState<
@@ -677,7 +677,7 @@ export default function Home() {
             {appState.persona !== "translator" && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Consultant Review + Final Selection</CardTitle>
+                  <CardTitle>AI Consultant Review + Final Selection</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div className="grid gap-2 md:grid-cols-[1fr_auto] md:items-end">

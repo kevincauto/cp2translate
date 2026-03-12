@@ -26,7 +26,7 @@ export function DiffViewer({ diffItems, onChange }: { diffItems: DiffItem[], onC
               <div>
                 { isTranslator ? 
                   <><input type="radio" value={ item.A } name="diff-select-group" onChange={(e) => onChange(e.target.value)} />&nbsp;<label htmlFor={ item.A } className="mt-1">Translation A: { item.A }</label></> 
-                  : <><span className="text-gray-500">Translation A:</span><span className=""> { item.A }</span></>
+                  : <><span className="text-gray-700">Translation A:</span><span className=""> { item.A }</span></>
                 }
               </div>
               <div>

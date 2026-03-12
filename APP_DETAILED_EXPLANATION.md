@@ -79,7 +79,7 @@ Provider enablement is dynamic: a provider is considered configured only if its 
 - `app/layout.tsx`: metadata + root layout.
 - `app/globals.css`: design tokens + base styles + running dots animation.
 - `app/page.tsx`: full workflow orchestration (main client component).
-- `app/section1.default.json`: sample i18next JSON used as initial textarea content.
+- `app/shortened-en.json`: sample i18next JSON used as initial textarea content.
 
 ### API routes
 - `app/api/parse/route.ts`: validate + flatten + warning detection.
