@@ -113,15 +113,13 @@ export function DiffViewer({
                               })
                             }
                           />
-                          <span>
-                            Option 4: Enter your preferred translation
-                          </span>
+                          <span>Enter your own custom translation:</span>
                         </span>
                         <Input
                           id={`custom-text-${item.keyPath}`}
                           type="text"
                           value={customValue}
-                          placeholder="Enter your preferred translation"
+                          placeholder="Preferred translation"
                           onFocus={() =>
                             onSelectionChange(item.keyPath, {
                               source: "custom",
