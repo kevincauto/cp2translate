@@ -7,16 +7,22 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import type { DiffItem } from "@/lib/types";
+import type { DiffItem, FinalSelection, TranslationId } from "@/lib/types";
 import { AppContext } from "@/app/page";
 import { Input } from "@/components/ui/input";
 
+const TRANSLATION_OPTIONS: TranslationId[] = ["A", "B", "C"];
+
 export function DiffViewer({
   diffItems,
-  onChange,
+  selections,
+  onSelectionChange,
+  onCustomValueChange,
 }: {
   diffItems: DiffItem[];
-  onChange: (item: string) => void;
+  selections: Record<string, FinalSelection>;
+  onSelectionChange: (keyPath: string, selection: FinalSelection) => void;
+  onCustomValueChange: (keyPath: string, value: string) => void;
 }) {
   const appContext = useContext(AppContext);
   const isTranslator = appContext?.appState.persona === "translator";
@@ -29,98 +35,113 @@ export function DiffViewer({
           <span className="text-blue-700 text-lg font-semibold">
             {diffItems.length}
           </span>{" "}
-          keys need consultant review.
+          {isTranslator
+            ? "keys require your final selection."
+            : "keys need consultant review."}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <ol className="divide-y">
-          {diffItems.slice(0, 50).map((item, i) => (
-            <li key={item.keyPath} className="">
-              <div className="inline-block px-6 py-3 text-sm flex flex-col gap-2">
-                <p className="relative">
-                  <span className="absolute top right-[101%] text-md">
-                    {i + 1})
-                  </span>
-                  <span className="font-mono font-semibold text-md text-blue-700">
-                    {item.keyPath}
-                  </span>
-                  : <span className="mt-1 text-md">"{item.english}"</span>
-                </p>
-                <div className="flex flex-col gap-2 mt-2">
-                  <div>
+          {diffItems.slice(0, 50).map((item, i) => {
+            const selected = selections[item.keyPath];
+            const customValue =
+              selected?.source === "custom" ? selected.value : "";
+
+            return (
+              <li key={item.keyPath}>
+                <div className="flex flex-col gap-2 px-6 py-3 text-sm">
+                  <p className="relative">
+                    <span className="absolute top right-[101%] text-md">
+                      {i + 1})
+                    </span>
+                    <span className="font-mono font-semibold text-md text-blue-700">
+                      {item.keyPath}
+                    </span>
+                    :{" "}
+                    <span className="mt-1 text-md">
+                      &quot;{item.english}&quot;
+                    </span>
+                  </p>
+                  <div className="mt-2 flex flex-col gap-2">
+                    {TRANSLATION_OPTIONS.map((translationId) => (
+                      <div key={`${item.keyPath}-${translationId}`}>
+                        {isTranslator ? (
+                          <label className="flex items-start gap-2">
+                            <input
+                              type="radio"
+                              value={translationId}
+                              name={item.keyPath}
+                              checked={selected?.source === translationId}
+                              onChange={() =>
+                                onSelectionChange(item.keyPath, {
+                                  source: translationId,
+                                  value: "",
+                                })
+                              }
+                            />
+                            <span>
+                              <span className="text-gray-700">
+                                Translation {translationId}:
+                              </span>{" "}
+                              {item[translationId]}
+                            </span>
+                          </label>
+                        ) : (
+                          <>
+                            <span className="text-gray-700">
+                              Translation {translationId}:
+                            </span>
+                            <span> {item[translationId]}</span>
+                          </>
+                        )}
+                      </div>
+                    ))}
                     {isTranslator ? (
-                      <>
-                        <input
-                          type="radio"
-                          value={item.A}
-                          name="diff-select-group"
-                          onChange={(e) => onChange(e.target.value)}
+                      <label className="flex flex-col gap-2 rounded border border-dashed p-3">
+                        <span className="flex items-center gap-2">
+                          <input
+                            type="radio"
+                            name={item.keyPath}
+                            checked={selected?.source === "custom"}
+                            onChange={() =>
+                              onSelectionChange(item.keyPath, {
+                                source: "custom",
+                                value:
+                                  selected?.source === "custom"
+                                    ? selected.value
+                                    : "",
+                              })
+                            }
+                          />
+                          <span>
+                            Option 4: Enter your preferred translation
+                          </span>
+                        </span>
+                        <Input
+                          id={`custom-text-${item.keyPath}`}
+                          type="text"
+                          value={customValue}
+                          placeholder="Enter your preferred translation"
+                          onFocus={() =>
+                            onSelectionChange(item.keyPath, {
+                              source: "custom",
+                              value: customValue,
+                            })
+                          }
+                          onChange={(event) =>
+                            onCustomValueChange(
+                              item.keyPath,
+                              event.target.value,
+                            )
+                          }
                         />
-                        &nbsp;
-                        <label htmlFor={item.A} className="mt-1">
-                          Translation A: {item.A}
-                        </label>
-                      </>
-                    ) : (
-                      <>
-                        <span className="text-gray-700">Translation A:</span>
-                        <span className=""> {item.A}</span>
-                      </>
-                    )}
-                  </div>
-                  <div>
-                    {isTranslator ? (
-                      <>
-                        <input
-                          type="radio"
-                          value={item.B}
-                          name="diff-select-group"
-                          onChange={(e) => onChange(e.target.value)}
-                        />
-                        &nbsp;
-                        <label htmlFor={item.B} className="mt-1">
-                          Translation B: {item.B}
-                        </label>
-                      </>
-                    ) : (
-                      <>
-                        <span className="text-gray-700">Translation B:</span>
-                        <span className=""> {item.B}</span>
-                      </>
-                    )}
-                  </div>
-                  <div>
-                    {isTranslator ? (
-                      <>
-                        <input
-                          type="radio"
-                          value={item.C}
-                          name="diff-select-group"
-                          onChange={(e) => onChange(e.target.value)}
-                        />
-                        &nbsp;
-                        <label htmlFor={item.C} className="mt-1">
-                          Translation C: {item.C}
-                        </label>
-                      </>
-                    ) : (
-                      <span className="text-gray-700">
-                        Translation C: {item.C}
-                      </span>
-                    )}
-                  </div>
-                  {isTranslator && (
-                    <div>
-                      <label htmlFor="custom-text">
-                        Or enter your preferred translation:
                       </label>
-                      <Input id="custom-text" type="text" />
-                    </div>
-                  )}
+                    ) : null}
+                  </div>
                 </div>
-              </div>
-            </li>
-          ))}
+              </li>
+            );
+          })}
         </ol>
         {diffItems.length > 50 ? (
           <p className="border-bs py-4 text-xs text-gray-600">

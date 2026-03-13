@@ -19,6 +19,11 @@ export type DiffItem = {
   C: string;
 };
 
+export type FinalSelection = {
+  source: TranslationId | "custom";
+  value: string;
+};
+
 export type Recommendation = {
   keyPath: string;
   english: string;

@@ -20,6 +20,7 @@ import { Select } from "@/components/ui/select";
 import shortenedEn from "@/app/shortened-en.json";
 import type {
   DiffItem,
+  FinalSelection,
   FlatEntry,
   MatchCounts,
   MatchMatrix as MatchMatrixType,
@@ -114,7 +115,7 @@ export default function Home() {
     Record<string, boolean>
   >({});
   const [finalSelections, setFinalSelections] = useState<
-    Record<string, TranslationId>
+    Record<string, FinalSelection>
   >({});
   const [globalError, setGlobalError] = useState<string | null>(null);
   const translateAbortRef = useRef<AbortController | null>(null);
@@ -133,16 +134,40 @@ export default function Home() {
     }
 
     const merged: TranslationMap = { ...translations.A };
-    const byDiffKey = new Map(diffItems.map((item) => [item.keyPath, item]));
     for (const item of diffItems) {
-      const selectedSource = finalSelections[item.keyPath];
-      const diff = byDiffKey.get(item.keyPath);
-      if (selectedSource && diff) {
-        merged[item.keyPath] = diff[selectedSource];
+      const selection = finalSelections[item.keyPath];
+      if (!selection) {
+        continue;
       }
+
+      if (selection.source === "custom") {
+        merged[item.keyPath] = selection.value;
+        continue;
+      }
+
+      merged[item.keyPath] = item[selection.source];
     }
     return merged;
   }, [diffItems, finalSelections, flatEntries.length, translations.A]);
+
+  const translatorSelectionsComplete = useMemo(() => {
+    if (appState.persona !== "translator") {
+      return false;
+    }
+
+    return diffItems.every((item) => {
+      const selection = finalSelections[item.keyPath];
+      if (!selection) {
+        return false;
+      }
+
+      if (selection.source !== "custom") {
+        return true;
+      }
+
+      return selection.value.trim().length > 0;
+    });
+  }, [appState.persona, diffItems, finalSelections]);
 
   const diffItemByKey = useMemo(
     () => new Map(diffItems.map((item) => [item.keyPath, item])),
@@ -347,9 +372,28 @@ export default function Home() {
     });
   }
 
-  const handleDiffSelections = () => {
-    // to-do: implement manual diff selections for translator persona
-  };
+  function handleTranslatorSelectionChange(
+    keyPath: string,
+    selection: FinalSelection,
+  ) {
+    setFinalSelections((prev) => ({
+      ...prev,
+      [keyPath]: selection,
+    }));
+  }
+
+  function handleTranslatorCustomValueChange(keyPath: string, value: string) {
+    setFinalSelections((prev) => {
+      const prior = prev[keyPath];
+      return {
+        ...prev,
+        [keyPath]: {
+          source: prior?.source === "custom" ? "custom" : "custom",
+          value,
+        },
+      };
+    });
+  }
 
   async function handleConsult() {
     setGlobalError(null);
@@ -388,7 +432,14 @@ export default function Home() {
             setOpinionChains(chainMap);
             setActiveOpinionIndexByKey(activeMap);
             setSecondOpinionProviderByKey(secondOpinionProviderMap);
-            setFinalSelections(defaults);
+            setFinalSelections(
+              Object.fromEntries(
+                Object.entries(defaults).map(([keyPath, source]) => [
+                  keyPath,
+                  { source, value: "" },
+                ]),
+              ),
+            );
           }
 
           if (event === "error") {
@@ -501,7 +552,7 @@ export default function Home() {
             });
             setFinalSelections((prev) => ({
               ...prev,
-              [keyPath]: rec.chosen,
+              [keyPath]: { source: rec.chosen, value: "" },
             }));
             setAppState({
               ...appState,
@@ -673,7 +724,31 @@ export default function Home() {
         appState.state === "reviewed" ? (
           <>
             <MatchMatrix matrix={matchMatrix} counts={matchCounts} />
-            <DiffViewer diffItems={diffItems} onChange={handleDiffSelections} />
+            <DiffViewer
+              diffItems={diffItems}
+              selections={finalSelections}
+              onSelectionChange={handleTranslatorSelectionChange}
+              onCustomValueChange={handleTranslatorCustomValueChange}
+            />
+            {appState.persona === "translator" ? (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Final JSON</CardTitle>
+                  <CardDescription>
+                    Select one option for every difference. Custom selections
+                    require text before the final JSON can be generated.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button
+                    onClick={handleDownload}
+                    disabled={!finalPreview || !translatorSelectionsComplete}
+                  >
+                    Download Final JSON
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : null}
             {appState.persona !== "translator" && (
               <Card>
                 <CardHeader>
@@ -781,13 +856,17 @@ export default function Home() {
                                             name={`${rec.keyPath}-${chainIndex}`}
                                             disabled={disabled}
                                             checked={
-                                              finalSelections[rec.keyPath] ===
-                                                option.source && isActive
+                                              finalSelections[rec.keyPath]
+                                                ?.source === option.source &&
+                                              isActive
                                             }
                                             onChange={() =>
                                               setFinalSelections((prev) => ({
                                                 ...prev,
-                                                [rec.keyPath]: option.source,
+                                                [rec.keyPath]: {
+                                                  source: option.source,
+                                                  value: "",
+                                                },
                                               }))
                                             }
                                           />

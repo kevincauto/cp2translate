@@ -35,7 +35,7 @@ The main user flow is:
 
 For the non-translator persona, this flow is implemented end to end.
 
-For the translator persona, the diff viewer shows manual choice controls, but the selection workflow is not fully wired yet. The current download path lives inside the consultant-driven review flow.
+For the translator persona, the diff viewer supports manual per-key review with four choices: Translation A, Translation B, Translation C, or a custom translation entered by the user. The Download Final JSON action stays disabled until every differing key has a valid selection, and custom selections require non-empty text.
 
 ## Architecture
 
@@ -303,7 +303,7 @@ npm run build
 - The app processes uploads and translations in memory only. Nothing is persisted by the server.
 - Translation lanes are hardwired to provider families: `A` is OpenAI, `B` is Gemini, and `C` is Anthropic.
 - If one or more providers are not configured, translation still runs for the configured lanes, but downstream comparison quality is naturally reduced.
-- The translator persona path is incomplete. Manual diff selection UI exists, but the actual selection handler is still marked TODO.
+- The translator persona path now supports manual per-difference final selection and JSON generation, including custom text overrides.
 - Consultant review and final selection are implemented inline in the main page rather than through the unused `ConsultantPanel` and `FinalJsonViewer` components.
 - The test suite currently covers chunking, flatten/unflatten behavior, token validation, and diff computation. It does not cover route handlers, SSE flows, or live provider integrations.
 
